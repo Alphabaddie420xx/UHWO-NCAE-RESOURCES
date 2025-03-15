@@ -43,7 +43,7 @@ sshd_config_settings(){
 
   # disable password auth
   echo "Disabling password authentication..."
-  sed -i 's/^PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+  sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
   echo "Password authentication has been disabled."
 
   # Idle timeout for SSH Session -- Will this impact users req for scoring?
@@ -56,6 +56,8 @@ sshd_config_settings(){
   # SSH protocol 2
   echo "Disabling SSH protocol 1 and ensuring protocol 2 is enabled..."
   sed -i 's/^Protocol.*/Protocol 2/' /etc/ssh/sshd_config
+  # Actually I dont think this is here by default so lez just put this line down
+  echo "Protocol 2" >> sshd_config
   echo "Only SSH protocol 2 will be used."
   
   ## Enable strong ciphers <-- need to test this first
@@ -76,12 +78,28 @@ sshd_config_settings(){
   echo "UseDNS set to no."
 
   # Banner
+  echo "setting Banner to none..."
+  sed -i 's/^#Banner.*/Banner none/' /etc/ssh/sshd_config
+  echo "UseDNS set to no."
+
+  # Enable public key authentication
+  echo "Enabling pub key auth..."
+  sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+  echo "Pub key auth enabled."
+
+  # Authentication Tries
+
+  # Limit sessions
+
+  # Don't use PAM
+  echo "UsePAM setting to no..."
+  sed -i 's/^UsePAM.*/UsePAM no/' /etc/ssh/sshd_config
+  echo "UsePAM set to no"
+  
+  # X11 Forwarding
   echo "Disabling X11 Forwarding..."
   sed -i 's/^X11Forwarding.*/X11Forwarding no/' /etc/ssh/sshd_config
   echo "X11 Forwarding disabled."
-
-  # X11 Forewarding
-  
   
   # Remind user to restart service to apply changes
   echo "Please restart the sshd service to apply changes!"
