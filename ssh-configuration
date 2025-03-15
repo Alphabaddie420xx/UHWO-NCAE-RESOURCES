@@ -3,18 +3,18 @@
 # Function to enable and start sshd
 sshd_enable(){
   echo "enabling..."
-  systemctl enable sshd
+  systemctl enable ssh
   echo "starting..."
-  systemctl start sshd
+  systemctl start ssh
   echo "Done. If any errors, end script and troubleshoot."
 }
 
 # Function to disable and stop sshd
 sshd_disable(){
   echo "stopping..."
-  systemctl stop sshd
+  systemctl stop ssh
   echo "Disabling..."
-  systemctl disable sshd
+  systemctl disable ssh
   echo "Done. If any errors, end script and troubleshoot."
 }
 
