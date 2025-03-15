@@ -1,0 +1,13 @@
+#!/bin/bash
+
+BASE_BACKUP_DIR="pathtobackup"
+LAST_NUM=$(ls "$BASE_BACKUP_DIR" | grep -E '^[0-9]+$' | sort -n | tail -1)
+if [[ -z "$LAST_NUM" ]]; then
+    NEXT_NUM=1
+else
+    NEXT_NUM=$((LAST_NUM + 1))
+fi
+NEW_BACKUP_DIR="$BASE_BACKUP_DIR/$NEXT_NUM"
+mkdir -p "$NEW_BACKUP_DIR"
+rsync -avz -e ssh /pathtostuff host@ip:"$NEW_BACKUP_DIR/"
+echo "Backup completed"
