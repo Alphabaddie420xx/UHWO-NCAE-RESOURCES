@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Temporarily turn off bash history
+set +o history
 
 # Function to display the list of current users along with their shell
 list_users() {
