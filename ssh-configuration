@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# temporarily turn off bash history while we run this command
+set +o history
+
 # Function to enable and start sshd
 sshd_enable(){
   echo "enabling..."
