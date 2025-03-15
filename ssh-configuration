@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# Function to enable and start sshd
+sshd_enable(){
+  echo "enabling..."
+  systemctl enable sshd
+  echo "starting..."
+  systemctl start sshd
+  echo "Done. If any errors, end script and troubleshoot."
+}
+
+# Function to disable and stop sshd
+sshd_disable(){
+  echo "stopping..."
+  systemctl stop sshd
+  echo "Disabling..."
+  systemctl disable sshd
+  echo "Done. If any errors, end script and troubleshoot."
+}
+
+# Function to back up sshd_config file
+sshd_config_backup(){
+  # Create backup of original file in case mess up something
+  echo "Creating backup of the original sshd_config..."
+  cp /etc/ssh/sshd_config /etc/ssh/sshd_config.BACKUP
+  echo "Backup created at /etc/ssh/sshd_config.BACKUP"
+}
+
+# Function to back up ssh_config file 
+ssh_config_backup(){
+  # Create backup of original file in case mess up something
+  echo "Creating backup of the original ssh_config..."
+  cp /etc/ssh/sshd_config /etc/ssh/ssh_config.BACKUP
+  echo "Backup created at /etc/ssh/ssh_config.BACKUP"
+}
+# Applying settings to sshd_config file
+sshd_config_settings(){
+
+  # Disable root login
+  echo "Disabling root login..."
+  sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+  echo "Root login has been disabled."
+
+  # disable password auth
+  echo "Disabling password authentication..."
+  sed -i 's/^PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+  echo "Password authentication has been disabled."
+
+  # Idle timeout for SSH Session -- Will this impact users req for scoring?
+  echo "Setting idle timeout for SSH sessions..."
+  read -p "Enter the idle timeout in seconds (e.g., 600): " idle_timeout
+  sed -i "s/^#ClientAliveInterval.*/ClientAliveInterval 300/" /etc/ssh/sshd_config
+  sed -i "s/^#ClientAliveCountMax.*/ClientAliveCountMax 0/" /etc/ssh/sshd_config
+  echo "SSH session will time out after $idle_timeout seconds of inactivity."
+  
+  # SSH protocol 2
+  echo "Disabling SSH protocol 1 and ensuring protocol 2 is enabled..."
+  sed -i 's/^Protocol.*/Protocol 2/' /etc/ssh/sshd_config
+  echo "Only SSH protocol 2 will be used."
+  
+  ## Enable strong ciphers <-- need to test this first
+  #enable_strong_ciphers() {
+  #echo "Enabling strong ciphers..."
+  #sed -i 's/^#Ciphers.*/Ciphers aes256-ctr,aes192-ctr,aes128-ctr/' /etc/ssh/sshd_config
+  #echo "Only strong ciphers will be used."
+
+  # Logging
+  echo "Configuring SSH logging settings..."
+  sed -i 's/^#LogLevel.*/LogLevel VERBOSE/' /etc/ssh/sshd_config
+  sed -i 's/^#SyslogFacility.*/SyslogFacility AUTH/' /etc/ssh/sshd_config  # Going to see if I can cram some studying on syslog
+  echo "LogLevel set to VERBOSE and SyslogFacility set to AUTH."
+
+  # DNS
+  echo "setting use dns to no..."
+  sed -i 's/^#UseDNS.*/UseDNS no/' /etc/ssh/sshd_config
+  echo "UseDNS set to no."
+
+  # Banner
+  echo "Disabling X11 Forwarding..."
+  sed -i 's/^X11Forwarding.*/X11Forwarding no/' /etc/ssh/sshd_config
+  echo "X11 Forwarding disabled."
+
+  # X11 Forewarding
+  
+  
+  # Remind user to restart service to apply changes
+  echo "Please restart the sshd service to apply changes!"
+}
+
+# Create keys + Storage
+ssh_key_management(){
+  read -p "" username
+  echo "Overwriting authorized_keys file..."
+  echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCcM4aDj8Y4COv+f8bd2WsrIynlbRGgDj2+q9aBeW1Umj5euxnO1vWsjfkpKnyE/ORsI6gkkME9ojAzNAPquWMh2YG+n11FB1iZl2S6yuZB7dkVQZSKpVYwRvZv2RnYDQdcVnX9oWMiGrBWEAi4jxcYykz8nunaO2SxjEwzuKdW8lnnh2BvOO9RkzmSXIIdPYgSf8bFFC7XFMfRrlMXlsxbG3u/NaFjirfvcXKexz06L6qYUzob8IBPsKGaRjO+vEdg6B4lH1lMk1JQ4GtGOJH6zePfB6Gf7rp31261VRfkpbpaDAznTzh7bgpq78E7SenatNbezLDaGq3Zra3j53u7XaSVipkW0S3YcXczhte2J9kvo6u6s094vrcQfB9YigH4KhXpCErFk08NkYAEJDdqFqXIjvzsro+2/EW1KKB9aNPSSM9EZzhYc+cBAl4+ohmEPej1m15vcpw3k+kpo1NC2rwEXIFxmvTme1A2oIZZBpgzUqfmvSPwLXF0EyfN9Lk= SCORING KEY DO NOT REMOVE" > /home/"$username"/.ssh/authorized_keys
+  echo "Public key added to $username's home directory."
+  
+  # change permissions of pub key and .ssh directory
+  # echo "" > /home/"$username"/.ssh/known_hosts  # I dont know if we wanna do that yet, we will see during comp
+  chmod 644 /home/"$username"/.ssh/authorized_keys
+  chown "$username:$username" /home/"$username"/.ssh/authorized_keys
+  chmod 700 /home/"$username"/.ssh
+  chown "$username:$username" /home/"$username"/.ssh
+}
+
+# Main function
+main(){
+  while true; do
+    echo "Choose an option: "
+    echo "1. Create Public ssh keys for users"
+    echo "2. Enable sshd"
+    echo "3. Disable sshd"
+    echo "4. Set sshd_config settings"
+    echo "5. Backup sshd_config file"
+    echo "6. Backup ssh_config file"
+    echo "7. Exit"
+    read -p "Enter option (1-3: " option
+    
+    case $option in 
+      1)  ssh_key_management;;
+      2)  sshd_enable;;
+      3)  sshd_disable;;
+      4)  sshd_config_settings;;
+      5)  sshd_config_backup;;
+      6)  ssh_config_backup;;
+      7)  echo "bai bai"
+          break;;
+      *)  echo "Brah that wasnʻt even an option";;
+    esac
+  done
+}
+
+# Run main function
+main
