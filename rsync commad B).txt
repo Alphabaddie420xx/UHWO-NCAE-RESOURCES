@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# func to make rsync command
+rsync_com() {
+   while true; do    
+       # Get user inputs
+       read -p "Path to backup: " BACKUP_DIR
+       read -p "Dir to backup: " BE_BACKUP
+       read -p "Enter IP: " IP_ADDR
+       read -p "Enter user:" USER
+       read -p "Private key path: " PRIV_PATH
+    
+       # Display the command
+       echo "sudo rsync -avz -e \"ssh -i $PRIV_PATH\" $BE_BACKUP $USER@$IP_ADDR:$BACKUP_DIR"
+       
+       # Confirm command 
+       read -p "Is this correct? Y/N: " YN
+    
+       # run command 
+       if [[ "$YN" == "Y" || "$YN" == "y" ]]; then
+          echo "Running command..."
+          # stop code
+          break
+       elif [[ "$YN" == "N" ]]; then
+           echo "ABORTING AND STARTING OVER"
+       fi
+    done
+}

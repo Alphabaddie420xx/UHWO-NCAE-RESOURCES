@@ -1,0 +1,13 @@
+!#/bin/bash
+
+FILE_PATH = "/path/alert.log"
+USER = "user"
+IP_ADDR = "backup_ip"
+BACKUP_PATH = /path/alert.log
+PRIV_PATH = path to key
+DATE = "+%Y-%m-%d %H:%M:%S"
+
+if grep -qi "red team" /etc/passwd; then
+	echo "$DATE intruder detected" >> $PRIV_PATH
+
+rsync -avz -e "ssh -i $PRIV_PATH" $FILE_PATH $USER@$IP_ADDR:$BACKUP_PATH
