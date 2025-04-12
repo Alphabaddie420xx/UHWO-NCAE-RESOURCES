@@ -1,0 +1,28 @@
+# Just gonna list the commands here, can choose to change this into a bash script
+
+
+#-------------------------------------------------------------------------------------------------------------
+
+# RUN ALL THESE COMMANDS W SUDO BTW
+
+# Create new admin user -- name it similar to the scoring users to make it harder for red team to find -- in other words RENAME ALL INSTANCES OF adminUser IN THIS DOC
+sudo useradd adminUser
+passwd adminUser #if you were not able to give em a pass after the command above 
+
+# add the new admin user to the sudo and admin group --- if there is no admin group just remove the admin one from this command
+usermod -a -G sudo,admin adminUser
+
+# Find all the users owned by root or root group, modify it to be owned by the new admin user
+sudo find / -user root -exec chown adminUser {} \; # NVM DONT RUN THIS
+sudo find / -group root -exec chown :adminUser {} \; # NVM DONT RUN THIS
+
+# Change root to /sbin/nologin
+just open the /etc/passwd file and modify it :/
+
+# Also create the /etc/securetty file to not allow root login
+touch /etc/securetty
+
+# Also change the /etc/ssh/sshd_config file to not permit root login
+/etc/ssh/sshd_config <- change or add the option: permitrootlogin no
+# Modify the sudoers file -- do not have to do this rlly, but do pls check if red team added anything
+
