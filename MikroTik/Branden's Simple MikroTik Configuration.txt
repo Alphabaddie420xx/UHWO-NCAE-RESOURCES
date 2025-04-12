@@ -1,0 +1,21 @@
+####################################################################################
+# Branden's Simple MikroTik Configuration
+####################################################################################
+# Author: Branden Ramos
+# Description: Very basic configurations for NCAE 2025
+# Version: 1.0
+####################################################################################
+
+# Hardening the Device
+/user add name=USERNAME password=PASSWORD group=full 
+/user disable admin 
+
+
+# Setting up WAN & LAN
+/interface p
+/ip address add address=172.18.13.T/16 interface=ether# comment = WAN
+/ip address add address=192.168.T.1/24 interface=ether# comment = LAN
+/ip firewall nat add chain=srcnat out-interface=ether# action=masquerade 
+
+# Backup
+/system backup save name=start encryption=aes-sha256 password=6;jE!WR5o45jPdN

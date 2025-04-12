@@ -1,0 +1,70 @@
+####################################################################################
+# Branden's Simple MikroTik Hardening Configuration
+####################################################################################
+# Author: Branden Ramos
+# Reference: Rick Frey
+# Description: Very basic firewall and port blocking configurations for NCAE 2025
+# Version: 1.0
+####################################################################################
+
+/ip firewall connection tracking
+set enabled=yes
+
+/ip firewall filter add chain=input connection-state=established,related action=accept comment="Allow Established & Related" log=yes log-prefix="EstablishedRelated"
+/ip firewall filter add chain=forward connection-state=established,related action=accept log=yes log-prefix="EstablishedRelated"
+
+# Drop Invalid Connections
+/ip firewall filter
+add action=drop chain=input comment="Drop Invalid Connections" connection-state=invalid disabled=no
+add action=drop chain=forward comment="Drop Invalid Connections" connection-state=invalid disabled=no
+
+# Port Scanners
+/ip firewall filter
+add action=add-src-to-address-list address-list="Wan Port Scanners" chain=input comment="Add TCP Port Scanners to Address List" protocol=tcp psd=40,3s,2,1
+add action=add-src-to-address-list address-list="LAN Port Scanners" chain=forward comment="Add TCP Port Scanners to Address List" protocol=tcp psd=40,3s,2,1
+add chain=output comment="Section Break" disabled=yes
+
+
+# Firewall Configuration
+/ip firewall filter add chain=input protocol=tcp dst-port=80 src-address=192.168.T.5 action=accept
+/ip firewall filter add chain=input protocol=tcp dst-port=80 connection-limit=10,32 action=drop log=yes log-prefix="Blocked Port 80"
+/ip firewall filter add chain=input protocol=tcp dst-port=8291 src-address=192.168.T.4[1-6] action=accept
+/ip firewall filter add chain=input protocol=tcp dst-port=8291 action=drop log=yes log-prefix="Blocked Winbox Access"
+
+
+# Brute Force Prevention
+/ip firewall filter
+add action=jump chain=input comment="Jump to RFC SSH Chain" disabled=no jump-target="RFC SSH Chain"
+add action=add-src-to-address-list address-list="Black List (SSH)" address-list-timeout=0s chain="RFC SSH Chain" comment="Transfer repeated attempts from SSH Stage 3 to Black-List" connection-state=new disabled=no dst-port=22 protocol=tcp src-address-list="SSH Stage 3"
+add action=add-src-to-address-list address-list="SSH Stage 3" address-list-timeout=1m chain="RFC SSH Chain" comment="Add succesive attempts to SSH Stage 3" connection-state=new disabled=no dst-port=22 protocol=tcp src-address-list="SSH Stage 2"
+add action=add-src-to-address-list address-list="SSH Stage 2" address-list-timeout=1m chain="RFC SSH Chain" comment="Add succesive attempts to SSH Stage 2" connection-state=new disabled=no dst-port=22 protocol=tcp src-address-list="SSH Stage 1"
+add action=add-src-to-address-list address-list="SSH Stage 1" address-list-timeout=1m chain="RFC SSH Chain" comment="Add intial attempt to SSH Stage 1 List" connection-state=new disabled=no dst-port=22 protocol=tcp
+add action=return chain="RFC SSH Chain" comment="Return From RFC SSH Chain" disabled=no
+add chain=output comment="Section Break" disabled=yes
+
+add action=jump chain=input comment="Jump to RFC Telnet Chain" disabled=no jump-target="RFC Telnet Chain"
+add action=add-src-to-address-list address-list="Black List (Telnet)" address-list-timeout=0s chain="RFC Telnet Chain" comment="Transfer repeated attempts from Telnet Stage 3 to Black-List" connection-state=new disabled=no dst-port=23 protocol=tcp src-address-list="Telnet Stage 3"
+add action=add-src-to-address-list address-list="Telnet Stage 3" address-list-timeout=1m chain="RFC Telnet Chain" comment="Add succesive attempts to Telnet Stage 3" connection-state=new disabled=no dst-port=23 protocol=tcp src-address-list="Telnet Stage 2"
+add action=add-src-to-address-list address-list="Telnet Stage 2" address-list-timeout=1m chain="RFC Telnet Chain" comment="Add succesive attempts to Telnet Stage 2" connection-state=new disabled=no dst-port=23 protocol=tcp src-address-list="Telnet Stage 1"
+add action=add-src-to-address-list address-list="Telnet Stage 1" address-list-timeout=1m chain="RFC Telnet Chain" comment="Add Intial attempt to Telnet Stage 1" connection-state=new disabled=no dst-port=23 protocol=tcp
+add action=return chain="RFC Telnet Chain" comment="Return From RFC Telnet Chain" disabled=no
+add chain=output comment="Section Break" disabled=yes
+
+add action=jump chain=input comment="Jump to RFC Winbox Chain" disabled=no jump-target="RFC Winbox Chain"
+add action=add-src-to-address-list address-list="Black List (Winbox)" address-list-timeout=0s chain="RFC Winbox Chain" comment="Transfer repeated attempts from Winbox Stage 3 to Black-List" connection-state=new disabled=no dst-port=8291 protocol=tcp src-address-list="Winbox Stage 3"
+add action=add-src-to-address-list address-list="Winbox Stage 3" address-list-timeout=1m chain="RFC Winbox Chain" comment="Add succesive attempts to Winbox Stage 3" connection-state=new disabled=no dst-port=8291 protocol=tcp src-address-list="Winbox Stage 2"
+add action=add-src-to-address-list address-list="Winbox Stage 2" address-list-timeout=1m chain="RFC Winbox Chain" comment="Add succesive attempts to Winbox Stage 2" connection-state=new disabled=no dst-port=8291 protocol=tcp src-address-list="Winbox Stage 1"
+add action=add-src-to-address-list address-list="Winbox Stage 1" address-list-timeout=1m chain="RFC Winbox Chain" comment="Add Intial attempt to Winbox Stage 1" connection-state=new disabled=no dst-port=8291 protocol=tcp
+add action=return chain="RFC Winbox Chain" comment="Return From RFC Winbox Chain" disabled=no
+add chain=output comment="Section Break" disabled=yes
+
+
+# Disabling Services
+/ip service set api disabled=yes
+/ip service set ftp disabled=yes
+/ip service set telnet disabled=yes
+/ip service set www disabled=no
+/ip service set winbox disabled=yes
+/ip service set telnet disabled=yes
+/ip service set api disabled=yes
+/ip service set api-ssl disabled=yes
