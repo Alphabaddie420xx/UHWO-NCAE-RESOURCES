@@ -1,18 +1,22 @@
-# external kali
+# these two are found in the /etc/network/interfaces file on their respective machines
+# external kali - adjust to the proper network interface that we will configure -- should be using dhcp
 auto eth0 
-iface eth0 inet static
-    address 172.18.15.10[1-6]
-    netmask 255.255.0.0
-    gateway 172.18.13.10
+iface eth0 inet dhcp
 
-# internal kali
+# internal kali -- adjust the network interface to what is on the machine
 auto eth0 
 iface eth0 inet static
     address 192.168.10.4[1-6]
     netmask 255.255.0.0
     gateway 192.168.10.1
 
+# -------------------------------------------------------------------------------------------------------------
+
 # DO NOT OVERRIDE THE FILE WITHOUT LOOKING AT IT FIRST. YOU NEED INFORMATION FROM IT TO TRANSFER HERE!!!
+
+# For ubuntu machines
+# this file is found in /etc/netplan/<interface>.yaml
+
 network:
     version: 2
     ethernets:
@@ -28,3 +32,31 @@ network:
                 via: <internal ip of the router(the mikrotik)>
             nameservers:
                 addresses: [<ip of the dns box>]
+
+# dont forget this
+sudo netplan apply
+
+# -------------------------------------------------------------------------------------------------------------
+# alternatively the configuration could look like this 
+
+# This file should be located in  /etc/sysconfig/network-scripts/<interface> or something along those lines
+# this one for dhcp
+DEVICE=eth0
+BOOTPROTO=dhcp
+ONBOOT=yes
+
+# or this for static configuration -- remember to change the fields -- remember to reference the original config and change this as needed:/
+
+TYPE="Ethernet"
+DEVICE="ens3"
+ONBOOT="yes"
+BOOTPROTO="none"
+IPADDR=12.34.56.78
+GATEWAY=12.34.56.1
+NETMASK=255.255.255.0
+DNS1=108.61.10.10
+
+
+
+For more example configs ref:
+https://gist.github.com/und3fined/e3b7eb511703ab7788dc15ae08254a7c
