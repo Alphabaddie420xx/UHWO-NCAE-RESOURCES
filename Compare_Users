@@ -1,0 +1,40 @@
+# make sure to run it like this: sudo bash checkusers.sh listofusernames
+
+
+#!/bin/bash
+
+# create the output file
+touch user_comparison_output.txt
+
+# Set variables
+USER_FILE=$1
+PASSWD_FILE=/etc/passwd
+NOTIFIED_USERS_FILE=notified_users.txt
+OUTPUT_FILE=user_comparison_output.txt
+
+# Check if input file exists
+if [ ! -f "$USER_FILE" ]; then
+  echo "Error: Input file not found."
+  exit 1
+fi
+
+# Read users from input file and compare to /etc/passwd
+while IFS= read -r user; do
+  # Get the UID of the matching user in /etc/passwd
+  uid=$(grep "^$user:" "$PASSWD_FILE" | cut -d: -f3)
+
+  if [ $uid -ge 1000 ]; then
+    # User found and has a valid UID, so skip them
+    continue
+  fi
+
+  if ! grep -q "^$user:" "$PASSWD_FILE"; then
+    # User not found in /etc/passwd (or is a service account), notify them and write to output file
+    echo "User $user not found in /etc/passwd" >> "$OUTPUT_FILE"
+    echo "Warning: User $user is not accounted for."
+  fi
+done < "$USER_FILE"
+
+# Print summary of results
+echo "Comparison Results:"
+cat "$OUTPUT_FILE"
