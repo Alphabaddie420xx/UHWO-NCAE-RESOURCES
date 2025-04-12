@@ -12,6 +12,9 @@ passwd adminUser #if you were not able to give em a pass after the command above
 # add the new admin user to the sudo and admin group --- if there is no admin group just remove the admin one from this command
 usermod -a -G sudo,admin adminUser
 
+# Check which groups we have on the box. Check the users in the important ones.
+groups
+
 # check users in the sudo group. We should only have our admin user in there
 sudo getent group sudo
 
