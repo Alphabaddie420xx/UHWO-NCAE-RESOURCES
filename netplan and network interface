@@ -12,20 +12,19 @@ iface eth0 inet static
     netmask 255.255.0.0
     gateway 192.168.10.1
 
+# DO NOT OVERRIDE THE FILE WITHOUT LOOKING AT IT FIRST. YOU NEED INFORMATION FROM IT TO TRANSFER HERE!!!
 network:
     version: 2
     ethernets:
-        enp1s0:
-            activation-mode: off
-        enp8s0:
+        <put the interface name here>:
             match:
-                macaddress:
+                macaddress: <whatever it says on the box>
             address:
-            - 
-            set-name: "enp8s0"
+            - <ip address of the box goes here>
+            set-name: "<interface name>"
             mtu: 1450
             routes
             - to: default
-                via: 
+                via: <internal ip of the router(the mikrotik)>
             nameservers:
-                addresses: [8.8.8.8, 8.8.4.4]
+                addresses: [<ip of the dns box>]
