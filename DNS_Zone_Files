@@ -1,0 +1,120 @@
+Put these in the zones directory that you make :)
+
+-- make sure to edit certain parts
+-- if it doesn't work, tweak it
+
+
+Internal Forward lookup file name:
+Team15.net
+
+Internal Forward lookup configuration:
+$TTL 600
+@         IN      SOA   <name for nameserver>.team10.net. root.localhost. (
+
+                                2 ; serial number
+
+                                3h        ; refresh
+
+                                1h        ; update retry
+
+                                1w         ; expiry
+
+                                1h         ; minimum
+
+                                )
+
+
+@           IN      NS      <name for nameserver>.team10.net
+; 
+ns1       IN      A       192.168.10.12
+db          IN      A      192.168.10.7
+www        IN      A       192.168.10.5
+gateway  IN    A           192.168.10.1 <- may or may not need this tbh
+
+
+
+External Forward lookup file name:
+Team15.ncaecybergames.org
+
+External Forward lookup configuration:
+$TTL 600
+@         IN      SOA   <name for nameserver>.team10.ncaecybergames.org. root.localhost. (
+
+                                2 ; serial number
+
+                                3h        ; refresh
+
+                                1h        ; update retry
+
+                                1w         ; expiry
+
+                                1h         ; minimum
+
+                                )
+
+@           IN      NS      <name for nameserver>.team10.ncaecybergames.org
+; 
+ns1       IN      A       172.18.13.10
+shell        IN      A       172.18.14.10
+www        IN      A       172.18.13.10
+files   IN    A    172.18.13.10
+
+
+
+
+Internal Reverse lookup file name:
+192.168.rev <-- might want to check and see if that changed
+
+Internal Reverse lookup configuration:
+$TTL 600
+@         IN      SOA   <name for nameserver>.team10.net. root.localhost. (
+
+                                2 ; serial number
+
+                                3h        ; refresh
+
+                                1h        ; update retry
+
+                                1w         ; expiry
+
+                                1h         ; minimum
+
+                                )
+
+@           IN      NS      <name for nameserver>.team10.net.
+; 
+12.10    IN      PTR       ns1.team10.net
+7.10          IN      PTR      db.team10.net
+5.10        IN      PTR       www.team10.net
+1.10  IN    PTR           gateway.team10.net
+
+
+
+External Reverse lookup file name:
+172.18.rev
+
+External Reverse lookup configuration:
+$TTL 600
+@         IN      SOA   <name for nameserver>.team10.ncaecybergames.org. root.localhost. (
+
+                                2 ; serial number
+
+                                3h        ; refresh
+
+                                1h        ; update retry
+
+                                1w         ; expiry
+
+                                1h         ; minimum
+
+                                )
+
+@           IN      NS      <name for nameserver>.team10.ncaecybergames.org.
+; 
+13.10    IN      PTR       ns1.team10.ncaecybergames.org.
+13.10          IN      PTR      www.team10.ncaecybergames.org.
+14.10        IN      PTR       shell.team10.ncaecybergames.org.
+14.10        IN      PTR       files.team10.ncaecybergames.org.
+13.10  IN    PTR           gateway.team10.ncaecybergames.org.
+
+
