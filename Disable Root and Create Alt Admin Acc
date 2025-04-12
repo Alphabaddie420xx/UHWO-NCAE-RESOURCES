@@ -18,10 +18,6 @@ groups
 # check users in the sudo group. We should only have our admin user in there
 sudo getent group sudo
 
-# Find all the users owned by root or root group, modify it to be owned by the new admin user
-sudo find / -user root -exec chown adminUser {} \; # NVM DONT RUN THIS
-sudo find / -group root -exec chown :adminUser {} \; # NVM DONT RUN THIS
-
 # Change root to /sbin/nologin
 just open the /etc/passwd file and modify it :/
 
