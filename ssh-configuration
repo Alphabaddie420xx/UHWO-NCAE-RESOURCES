@@ -1,7 +1,12 @@
+#when running this, type: sudo bash sshscript.sh listofusernames
+# sshscript.sh is this. listofusernames is the list of ssh users given and is a separate file from this one.
+
 #!/bin/bash
 
 # temporarily turn off bash history while we run this command
 set +o history
+
+USER_FILE=$1
 
 # Function to enable and start sshd
 sshd_enable(){
@@ -110,17 +115,35 @@ sshd_config_settings(){
 
 # Create keys + Storage
 ssh_key_management(){
-  read -p "" username
-  echo "Overwriting authorized_keys file..."
-  echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCcM4aDj8Y4COv+f8bd2WsrIynlbRGgDj2+q9aBeW1Umj5euxnO1vWsjfkpKnyE/ORsI6gkkME9ojAzNAPquWMh2YG+n11FB1iZl2S6yuZB7dkVQZSKpVYwRvZv2RnYDQdcVnX9oWMiGrBWEAi4jxcYykz8nunaO2SxjEwzuKdW8lnnh2BvOO9RkzmSXIIdPYgSf8bFFC7XFMfRrlMXlsxbG3u/NaFjirfvcXKexz06L6qYUzob8IBPsKGaRjO+vEdg6B4lH1lMk1JQ4GtGOJH6zePfB6Gf7rp31261VRfkpbpaDAznTzh7bgpq78E7SenatNbezLDaGq3Zra3j53u7XaSVipkW0S3YcXczhte2J9kvo6u6s094vrcQfB9YigH4KhXpCErFk08NkYAEJDdqFqXIjvzsro+2/EW1KKB9aNPSSM9EZzhYc+cBAl4+ohmEPej1m15vcpw3k+kpo1NC2rwEXIFxmvTme1A2oIZZBpgzUqfmvSPwLXF0EyfN9Lk= SCORING KEY DO NOT REMOVE" > /home/"$username"/.ssh/authorized_keys
-  echo "Public key added to $username's home directory."
-  
-  # change permissions of pub key and .ssh directory
-  # echo "" > /home/"$username"/.ssh/known_hosts  # I dont know if we wanna do that yet, we will see during comp
-  chmod 644 /home/"$username"/.ssh/authorized_keys
-  chown "$username:$username" /home/"$username"/.ssh/authorized_keys
-  chmod 700 /home/"$username"/.ssh
-  chown "$username:$username" /home/"$username"/.ssh
+  if [ ! -f "$USER_FILE" ]; then
+    echo "Error: File not found: $user_list"
+    return 1
+  fi
+
+  while IFS= read -r username; do
+    user_home="/home/$username"
+    ssh_dir="$user_home/.ssh"
+    auth_keys="$ssh_dir/authorized_keys"
+
+    if id "$username" &>/dev/null; then
+      echo "Setting up SSH key for $username..."
+
+      # Create .ssh directory if not exists
+      mkdir -p "$ssh_dir"
+
+      # Write public key (overwrite)
+      echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCcM4aDj8Y4COv+f8bd2WsrIynlbRGgDj2+q9aBeW1Umj5euxnO1vWsjfkpKnyE/ORsI6gkkME9ojA>
+
+      # Set permissions
+      chmod 700 "$ssh_dir"
+      chmod 644 "$auth_keys"
+      chown -R "$username:$username" "$ssh_dir"
+
+      echo "Public key added for $username."
+    else
+      echo "Skipping: user '$username' does not exist."
+    fi
+  done < "$USER_FILE"
 }
 
 # Main function
