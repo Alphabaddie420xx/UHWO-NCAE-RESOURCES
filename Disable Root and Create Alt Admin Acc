@@ -6,6 +6,8 @@ CHECK THE DISCORD FOR THE ADMIN USER USERNAME
 
 # RUN ALL THESE COMMANDS W SUDO BTW
 
+set +o history
+
 # Create new admin user -- name it similar to the scoring users to make it harder for red team to find -- in other words RENAME ALL INSTANCES OF adminUser IN THIS DOC
 sudo useradd adminUser
 passwd adminUser #if you were not able to give em a pass after the command above 
