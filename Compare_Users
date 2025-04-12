@@ -1,6 +1,7 @@
 # make sure to run it like this: sudo bash checkusers.sh listofusernames
 # listofusernames is the list of usernames. Make sure there is no blank line at the end, no spaces or no tabs at front
 # The output of unauthorized users should be nobody (make sure this user is set to /usr/sbin/nologin), our adminUser, and whatever other user YOU KNOW YOU CREATED. no one else.
+# if you find the red team user, check their bash_history before removing them :)
 
 #!/bin/bash
 
