@@ -1,6 +1,6 @@
 Postgres user read write
 GRANT SELECT, INSERT, UPDATE, DELETE
-ON ALL TABLES IN SCHEMA schema_name
-TO username;
+ON ALL TABLES IN SCHEMA public
+TO bill_kaplan;
 
 
