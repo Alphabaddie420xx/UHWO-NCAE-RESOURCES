@@ -1,16 +1,17 @@
 # make sure to run it like this: sudo bash checkusers.sh listofusernames
-# listofusernames is the list of usernames. Make sure there is no blank line at the end
+# listofusernames is the list of usernames. Make sure there is no blank line at the end, no spaces or no tabs at front
 
 #!/bin/bash
 
-# create the output file
-touch user_comparison_output.txt
+# Create/reset output files
+: > user_comparison_output.txt
+: > unauthorized_users.txt
 
 # Set variables
 USER_FILE=$1
 PASSWD_FILE=/etc/passwd
-NOTIFIED_USERS_FILE=notified_users.txt
 OUTPUT_FILE=user_comparison_output.txt
+UNAUTHORIZED_FILE=unauthorized_users.txt
 
 # Check if input file exists
 if [ ! -f "$USER_FILE" ]; then
@@ -18,23 +19,37 @@ if [ ! -f "$USER_FILE" ]; then
   exit 1
 fi
 
-# Read users from input file and compare to /etc/passwd
+# Read users from input file into an array for quick lookup
+mapfile -t input_users < "$USER_FILE"
+
+# Step 1: Check each input user — are they missing from /etc/passwd or service account?
 while IFS= read -r user; do
-  # Get the UID of the matching user in /etc/passwd
+  # Get the UID from /etc/passwd
   uid=$(grep "^$user:" "$PASSWD_FILE" | cut -d: -f3)
 
-  if [ $uid -ge 1000 ]; then
-    # User found and has a valid UID, so skip them
-    continue
+  if [ -n "$uid" ]; then
+    if [ "$uid" -ge 1000 ]; then
+      # Valid regular user found, no need to notify
+      continue
+    fi
   fi
 
   if ! grep -q "^$user:" "$PASSWD_FILE"; then
-    # User not found in /etc/passwd (or is a service account), notify them and write to output file
     echo "User $user not found in /etc/passwd" >> "$OUTPUT_FILE"
     echo "Warning: User $user is not accounted for."
   fi
 done < "$USER_FILE"
 
-# Print summary of results
+# Step 2: Check all users in /etc/passwd — who isn't on the approved list?
+awk -F: '$3 >= 1000 { print $1 }' "$PASSWD_FILE" | while read -r existing_user; do
+  if ! printf '%s\n' "${input_users[@]}" | grep -qx "$existing_user"; then
+    echo "$existing_user" >> "$UNAUTHORIZED_FILE"
+  fi
+done
+
+# Print summary
 echo "Comparison Results:"
 cat "$OUTPUT_FILE"
+echo
+echo "Unauthorized Users (UID >= 1000 not in list):"
+cat "$UNAUTHORIZED_FILE"
