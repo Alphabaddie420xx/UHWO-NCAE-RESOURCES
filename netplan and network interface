@@ -1,3 +1,7 @@
+# DISCLAIMER!! change the ips to fit the topology :)
+
+
+
 # these two are found in the /etc/network/interfaces file on their respective machines
 # external kali - adjust to the proper network interface that we will configure -- should be using dhcp
 auto eth0 
