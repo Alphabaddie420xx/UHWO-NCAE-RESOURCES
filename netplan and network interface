@@ -63,6 +63,7 @@ NETMASK=255.255.255.0
 DNS1=108.61.10.10
 
 
+sudo systemctl restart network
 
 For more example configs ref:
 https://gist.github.com/und3fined/e3b7eb511703ab7788dc15ae08254a7c
