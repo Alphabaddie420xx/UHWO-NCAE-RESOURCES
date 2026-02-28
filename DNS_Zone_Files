@@ -24,7 +24,7 @@ $TTL 600
                                 )
 
 
-@           IN      NS      <name for nameserver>.team10.net
+@           IN      NS      <name for nameserver>.team10.net.
 ; 
 ns1       IN      A       192.168.10.12
 db          IN      A      192.168.10.7
@@ -52,7 +52,7 @@ $TTL 600
 
                                 )
 
-@           IN      NS      <name for nameserver>.team10.ncaecybergames.org
+@           IN      NS      <name for nameserver>.team10.ncaecybergames.org.
 ; 
 ns1       IN      A       172.18.13.10
 shell        IN      A       172.18.14.10
