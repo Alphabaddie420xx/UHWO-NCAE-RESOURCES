@@ -118,3 +118,10 @@ $TTL 600
 13.10  IN    PTR           gateway.team10.ncaecybergames.org.
 
 
+-------------------------------------------
+chown named:named /var/named/zones/*
+sudo systemctl restart named
+
+# Make sure to add firewall rule too.
+sudo firewall-cmd --permanent --add-service=dns
+sudo firewall-cmd --reload
